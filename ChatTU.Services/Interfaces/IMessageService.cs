@@ -1,6 +1,7 @@
 ﻿using ChatTU.Data.Models;
 using System;
 using System.Collections.Generic;
+using System.Web;
 
 namespace ChatTU.Services.Interfaces
 {
@@ -15,6 +16,8 @@ namespace ChatTU.Services.Interfaces
         void AddMessage(int conversationId, string sendBy, string content, DateTime time);
 
         bool IsFullHistory(int conversationId, int messageCount);
+
+        int SaveFile(HttpPostedFile file);
 
         List<ConvesationEntity> ADMIN_GetConvesationsForUser(string username);
 

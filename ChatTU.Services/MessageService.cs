@@ -4,9 +4,11 @@ using ChatTU.Data.Models;
 using ChatTU.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ChatTU.Services
 {
@@ -139,6 +141,29 @@ namespace ChatTU.Services
             var total = _unitOfWork.Messages.GetAll().Where(x => x.Conversation.Id == conversationId).Count();
 
             return messageCount > total;
+        }
+
+        public int SaveFile(HttpPostedFile postedFile)
+        {
+            //Convert the File data to Byte Array.
+            byte[] bytes;
+            using (BinaryReader br = new BinaryReader(postedFile.InputStream))
+            {
+                bytes = br.ReadBytes(postedFile.ContentLength);
+            }
+
+            //Insert the File to Database Table.
+            //FilesEntities entities = new FilesEntities();
+            //tblFile file = new tblFile
+            //{
+            //    Name = Path.GetFileName(postedFile.FileName),
+            //    ContentType = postedFile.ContentType,
+            //    Data = bytes
+            //};
+            //entities.tblFiles.Add(file);
+            //entities.SaveChanges();
+            //throw new NotImplementedException();
+            return 1;
         }
     }
 }

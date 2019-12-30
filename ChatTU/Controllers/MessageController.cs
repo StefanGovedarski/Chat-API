@@ -4,6 +4,7 @@ using ChatTU.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
@@ -87,10 +88,10 @@ namespace ChatTU.Controllers
 
             if (conversationId <= 0 || count <= 0)
             {
-                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
-            return Request.CreateResponse(System.Net.HttpStatusCode.OK, response.Select(x => MessageMapping.ToMessageDto(x, currentUser)));
+            return Request.CreateResponse(HttpStatusCode.OK, response.Select(x => MessageMapping.ToMessageDto(x, currentUser)));
         }
 
         [HttpPost]
@@ -107,54 +108,22 @@ namespace ChatTU.Controllers
             return Ok();
         }
 
-        // ADMIN endpoints
-
-        [HttpGet]
-        [Authorize(Roles = "ADMIN")]
-        [Route("GetConversations")]
-        public IEnumerable<Conversation> GetAllConversationsForUser([FromUri] string username)
+        [HttpPost]
+        [Route("SaveFile")]
+        public HttpResponseMessage SaveFile()
         {
-            return _messageService.ADMIN_GetConvesationsForUser(username).Select(x => ConversationMapping.ToConversationDto(x, username));
-        }
+            //Create HTTP Response.
+            HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK);
 
-        [HttpGet]
-        [Authorize(Roles = "ADMIN")]
-        [Route("GetMessages")]
-        public IEnumerable<Message> GetAllMessagesForConversation([FromUri] int conversationId)
-        {
-            return _messageService.ADMIN_GetMessagesForConversation(conversationId).Select(x => MessageMapping.ToMessageDto(x, HttpContext.Current.User.Identity.Name));
-        }
+            //Check if Request contains File.
+            if (HttpContext.Current.Request.Files.Count == 0)
+            {
+                throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+            }
 
-        [HttpPut]
-        [Authorize(Roles = "ADMIN")]
-        [Route("EditMessage")]
-        public IHttpActionResult EditMessage([FromBody] int messageId, [FromBody] string content)
-        {
+            var messageIdForFile = _messageService.SaveFile(HttpContext.Current.Request.Files[0]);
 
-            _messageService.ADMIN_EditMessage(messageId, content);
-            return Ok();
-        }
-
-        // This endpoints deletes a specific message from the system.
-        [HttpDelete]
-        [Authorize(Roles = "ADMIN")]
-        [Route("RemoveMessage")]
-        public IHttpActionResult DeleteMessage([FromUri] int messageId)
-        {
-            _messageService.ADMIN_DeleteMessage(messageId);
-
-            return Ok();
-        }
-
-        // This endpoint deletes a specific conversation with all messages connected to it.
-        [HttpDelete]
-        [Authorize(Roles = "ADMIN")]
-        [Route("RemoveConversation")]
-        public IHttpActionResult DeleteConversation([FromUri] int conversationId)
-        {
-            _messageService.ADMIN_DeleteConversation(conversationId);
-
-            return Ok();
+            return Request.CreateResponse(HttpStatusCode.OK, new { messageId = messageIdForFile });
         }
     }
 }
