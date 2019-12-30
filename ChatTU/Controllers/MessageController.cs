@@ -110,8 +110,11 @@ namespace ChatTU.Controllers
 
         [HttpPost]
         [Route("SaveFile")]
-        public HttpResponseMessage SaveFile()
+        [Authorize(Roles = "ADMIN,CLIENT")]
+        public HttpResponseMessage SaveFile([FromUri] int conversationId)
         {
+            var currentUsername = HttpContext.Current.User.Identity.Name;
+
             //Create HTTP Response.
             HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK);
 
@@ -121,9 +124,9 @@ namespace ChatTU.Controllers
                 throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
             }
 
-            var messageIdForFile = _messageService.SaveFile(HttpContext.Current.Request.Files[0]);
+            var messageEntity = _messageService.SaveFile(HttpContext.Current.Request.Files[0], currentUsername, conversationId);
 
-            return Request.CreateResponse(HttpStatusCode.OK, new { messageId = messageIdForFile });
+            return Request.CreateResponse(HttpStatusCode.OK, new { message = MessageMapping.ToMessageDto(messageEntity, currentUsername) });
         }
     }
 }

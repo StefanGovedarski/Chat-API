@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChatTU.Data.Models
 {
-    [Table("Conversation")]
+    [Table("Conversations")]
     public class ConvesationEntity : BaseEntity
     {
         [Required]

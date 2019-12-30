@@ -17,16 +17,6 @@ namespace ChatTU.Services.Interfaces
 
         bool IsFullHistory(int conversationId, int messageCount);
 
-        int SaveFile(HttpPostedFile file);
-
-        List<ConvesationEntity> ADMIN_GetConvesationsForUser(string username);
-
-        List<MessageEntity> ADMIN_GetMessagesForConversation(int conversationId);
-
-        void ADMIN_EditMessage(int messageId, string content);
-
-        void ADMIN_DeleteMessage(int messageId);
-
-        void ADMIN_DeleteConversation(int conversationId);
+        MessageEntity SaveFile(HttpPostedFile file, string currentUsername, int conversationId);
     }
 }

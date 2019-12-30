@@ -50,7 +50,7 @@ namespace ChatTU.Services
             var currUserId = users.First(x => x.Username == currentUser).Id;
             var targetUserId = users.First(x => x.Username == targetUser).Id;
 
-            conversation = _unitOfWork.Conversations.GetAll().FirstOrDefault(x => (x.FromUser.Id == currUserId && x.ToUser.Id == targetUserId ) || 
+            conversation = _unitOfWork.Conversations.GetAll().FirstOrDefault(x => (x.FromUser.Id == currUserId && x.ToUser.Id == targetUserId) ||
                                                                                   (x.FromUser.Id == targetUserId && x.ToUser.Id == currUserId));
 
             if (conversation == null)
@@ -67,55 +67,6 @@ namespace ChatTU.Services
             }
 
             return conversation;
-        }
-
-        public void ADMIN_DeleteConversation(int conversationId)
-        {
-            var conv = _unitOfWork.Conversations.GetAll().FirstOrDefault(x => x.Id == conversationId);
-            var messages = _unitOfWork.Messages.GetAll().Where(x => x.Conversation.Id == conversationId);
-            if (conv != null)
-            {
-                _unitOfWork.Messages.RemoveRange(messages);
-                _unitOfWork.Conversations.Remove(conv);
-                _unitOfWork.Save();
-            }
-        }
-
-        public void ADMIN_DeleteMessage(int messageId)
-        {
-            var message = _unitOfWork.Messages.GetAll().FirstOrDefault(x => x.Id == messageId);
-            if (message != null)
-            {
-                _unitOfWork.Messages.Remove(message);
-                _unitOfWork.Save();
-            }
-        }
-
-        public void ADMIN_EditMessage(int messageId, string content)
-        {
-            var message = _unitOfWork.Messages.GetAll().FirstOrDefault(x => x.Id == messageId);
-            if (message != null)
-            {
-                message.Content = content;
-                _unitOfWork.Save();
-
-            }
-        }
-
-        public List<ConvesationEntity> ADMIN_GetConvesationsForUser(string username)
-        {
-            var conversations = new List<ConvesationEntity>();
-            var user = _unitOfWork.Users.GetAll().FirstOrDefault(x => x.Username == username);
-            if (user != null)
-            {
-                conversations = _unitOfWork.Conversations.GetAll().Where(x => x.FromUserId == user.Id || x.ToUserId == user.Id).ToList();
-            }
-            return conversations;
-        }
-
-        public List<MessageEntity> ADMIN_GetMessagesForConversation(int conversationId)
-        {
-            return _unitOfWork.Messages.GetAll().Where(x => x.Conversation.Id == conversationId).ToList();
         }
 
         public void AddMessage(int conversationId, string sendBy, string content, DateTime time)
@@ -143,7 +94,7 @@ namespace ChatTU.Services
             return messageCount > total;
         }
 
-        public int SaveFile(HttpPostedFile postedFile)
+        public MessageEntity SaveFile(HttpPostedFile postedFile, string currentUsername, int conversationId)
         {
             //Convert the File data to Byte Array.
             byte[] bytes;
@@ -152,18 +103,33 @@ namespace ChatTU.Services
                 bytes = br.ReadBytes(postedFile.ContentLength);
             }
 
-            //Insert the File to Database Table.
-            //FilesEntities entities = new FilesEntities();
-            //tblFile file = new tblFile
-            //{
-            //    Name = Path.GetFileName(postedFile.FileName),
-            //    ContentType = postedFile.ContentType,
-            //    Data = bytes
-            //};
-            //entities.tblFiles.Add(file);
-            //entities.SaveChanges();
-            //throw new NotImplementedException();
-            return 1;
+            var conv = _unitOfWork.Conversations.GetAll().FirstOrDefault(x => x.Id == conversationId);
+            var timeNow = DateTime.Now;
+
+            MessageEntity newMessage = new MessageEntity()
+            {
+                IsAttachment = true,
+                Status = Data.Enums.MessageStatus.DELIVERED,
+                SendBy = currentUsername,
+                Time = timeNow,
+                Content = postedFile.FileName,
+                Conversation = conv
+            };
+
+            _unitOfWork.Messages.Add(newMessage);
+
+            FileEntity newFile = new FileEntity()
+            {
+                Message = newMessage,
+                Name = Path.GetFileName(postedFile.FileName),
+                ContentType = postedFile.ContentType,
+                Data = bytes
+            };
+
+            _unitOfWork.Files.Add(newFile);
+            _unitOfWork.Save();
+
+            return newMessage;
         }
     }
 }

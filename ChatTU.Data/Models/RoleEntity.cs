@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ChatTU.Data.Models
 {
-    [Table("Role")]
+    [Table("Roles")]
     public class RoleEntity : BaseEntity
     {
         public string RoleName { get; set; }

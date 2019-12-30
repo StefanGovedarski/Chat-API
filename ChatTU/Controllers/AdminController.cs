@@ -14,13 +14,11 @@ namespace ChatTU.Controllers
     [RoutePrefix("admin")]
     public class AdminController : ApiController
     {
-        private readonly IMessageService _messageService;
-        private readonly IUserService _userService;
+        private readonly IAdminService _adminService;
 
-        public AdminController(IMessageService messageService, IUserService userService)
+        public AdminController(IAdminService adminService)
         {
-            _messageService = messageService;
-            _userService = userService;
+            _adminService = adminService;
         }
 
         //user admin endpoints
@@ -31,7 +29,17 @@ namespace ChatTU.Controllers
         [Route("GetUser")]
         public User GetUser([FromUri]string username, [FromUri] int id)
         {
-            return UserMappings.ToUserDto(_userService.ADMIN_GetUser(username, id));
+            return UserMappings.ToUserDto(_adminService.ADMIN_GetUser(username, id));
+        }
+
+        // Edit data for a specific user from the system
+        [HttpPut]
+        [Authorize(Roles = "ADMIN")]
+        [Route("EditUser")]
+        public IHttpActionResult EditUser([FromBody] User_Admin user)
+        {
+            _adminService.ADMIN_EditUser(user.Id, user.Username, user.Password, user.Firstname, user.Lastname);
+            return Ok();
         }
 
         // Gets data for all users in the system
@@ -40,7 +48,7 @@ namespace ChatTU.Controllers
         [Route("GetUsers")]
         public IEnumerable<User> GetAllUsers()
         {
-            return _userService.ADMIN_GetAllUsers().Select(x => UserMappings.ToUserDto(x));
+            return _adminService.ADMIN_GetAllUsers().Select(x => UserMappings.ToUserDto(x));
         }
 
         // This endpoints deletes a specific user with all conversation and message data.
@@ -54,7 +62,7 @@ namespace ChatTU.Controllers
                 return BadRequest("Username or id has to be provided");
             }
 
-            _userService.ADMIN_DeleteUser(username, id);
+            _adminService.ADMIN_DeleteUser(username, id);
 
             return Ok();
         }
@@ -65,34 +73,36 @@ namespace ChatTU.Controllers
         [Route("GetConversations")]
         public IEnumerable<Conversation> GetAllConversationsForUser([FromUri] string username)
         {
-            return _messageService.ADMIN_GetConvesationsForUser(username).Select(x => ConversationMapping.ToConversationDto(x, username));
+            return _adminService.ADMIN_GetConvesationsForUser(username).Select(x => ConversationMapping.ToConversationDto(x, username));
         }
 
+        // Returns all messages for one specific conversation.
         [HttpGet]
         [Authorize(Roles = "ADMIN")]
         [Route("GetMessages")]
         public IEnumerable<Message> GetAllMessagesForConversation([FromUri] int conversationId)
         {
-            return _messageService.ADMIN_GetMessagesForConversation(conversationId).Select(x => MessageMapping.ToMessageDto(x, HttpContext.Current.User.Identity.Name));
+            return _adminService.ADMIN_GetMessagesForConversation(conversationId).Select(x => MessageMapping.ToMessageDto(x, HttpContext.Current.User.Identity.Name));
         }
 
+        // Edits data for a specific message in the system.
         [HttpPut]
         [Authorize(Roles = "ADMIN")]
         [Route("EditMessage")]
         public IHttpActionResult EditMessage([FromBody] int messageId, [FromBody] string content)
         {
 
-            _messageService.ADMIN_EditMessage(messageId, content);
+            _adminService.ADMIN_EditMessage(messageId, content);
             return Ok();
         }
 
         // This endpoints deletes a specific message from the system.
         [HttpDelete]
         [Authorize(Roles = "ADMIN")]
-        [Route("RemoveMessage")]
+        [Route("DeleteMessage")]
         public IHttpActionResult DeleteMessage([FromUri] int messageId)
         {
-            _messageService.ADMIN_DeleteMessage(messageId);
+            _adminService.ADMIN_DeleteMessage(messageId);
 
             return Ok();
         }
@@ -100,10 +110,21 @@ namespace ChatTU.Controllers
         // This endpoint deletes a specific conversation with all messages connected to it.
         [HttpDelete]
         [Authorize(Roles = "ADMIN")]
-        [Route("RemoveConversation")]
+        [Route("DeleteConversation")]
         public IHttpActionResult DeleteConversation([FromUri] int conversationId)
         {
-            _messageService.ADMIN_DeleteConversation(conversationId);
+            _adminService.ADMIN_DeleteConversation(conversationId);
+
+            return Ok();
+        }
+
+        // This endpoints deletes a specific file from the system.
+        [HttpDelete]
+        [Authorize(Roles = "ADMIN")]
+        [Route("DeleteFile")]
+        public IHttpActionResult DeleteFile([FromUri] int fileId)
+        {
+            _adminService.ADMIN_DeleteFile(fileId);
 
             return Ok();
         }

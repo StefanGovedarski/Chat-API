@@ -13,13 +13,5 @@ namespace ChatTU.Services.Interfaces
         bool GetUsersLoggedInStatus(string username);
 
         Task MarkLoggedInStatusAs(string username, bool status);
-
-        IEnumerable<UserEntity> ADMIN_GetAllUsers();
-
-        UserEntity ADMIN_GetUser(string username, int id);
-
-        void ADMIN_DeleteUser(string username, int id);
-
-
     }
 }

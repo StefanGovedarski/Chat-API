@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChatTU.Data.Models
 {
-    [Table("Message")]
+    [Table("Messages")]
     public class MessageEntity : BaseEntity
     {
         [Required]

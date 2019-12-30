@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ChatTU.Data.Models
 {
-    [Table("File")]
+    [Table("Files")]
     public class FileEntity
     {
         [Key, ForeignKey("Message")]

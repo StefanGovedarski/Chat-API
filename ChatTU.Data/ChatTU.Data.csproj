@@ -159,6 +159,10 @@
     <Compile Include="Migrations\201912291509406_FileEntity.Designer.cs">
       <DependentUpon>201912291509406_FileEntity.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201912302311551_TableRenamesToConvention.cs" />
+    <Compile Include="Migrations\201912302311551_TableRenamesToConvention.Designer.cs">
+      <DependentUpon>201912302311551_TableRenamesToConvention.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ConvesationEntity.cs" />
     <Compile Include="Models\FileEntity.cs" />
@@ -185,6 +189,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201912291509406_FileEntity.resx">
       <DependentUpon>201912291509406_FileEntity.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201912302311551_TableRenamesToConvention.resx">
+      <DependentUpon>201912302311551_TableRenamesToConvention.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -137,6 +137,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminService.cs" />
+    <Compile Include="Interfaces\IAdminService.cs" />
     <Compile Include="Interfaces\IMessageService.cs" />
     <Compile Include="Interfaces\IUserService.cs" />
     <Compile Include="MessageService.cs" />
