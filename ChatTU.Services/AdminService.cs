@@ -107,22 +107,6 @@ namespace ChatTU.Services
             }
         }
 
-        public void ADMIN_DeleteMessage(int messageId)
-        {
-            var message = _unitOfWork.Messages.GetAll().FirstOrDefault(x => x.Id == messageId);
-            var file = _unitOfWork.Files.GetAll().FirstOrDefault(x => x.Message.Id == message.Id);
-
-            if (message != null)
-            {
-                if (file != null)
-                {
-                    _unitOfWork.Files.Remove(file);
-                }
-                _unitOfWork.Messages.Remove(message);
-                _unitOfWork.Save();
-            }
-        }
-
         public void ADMIN_EditMessage(int messageId, string content)
         {
             var message = _unitOfWork.Messages.GetAll().FirstOrDefault(x => x.Id == messageId);

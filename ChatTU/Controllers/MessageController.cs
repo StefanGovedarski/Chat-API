@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -78,7 +79,7 @@ namespace ChatTU.Controllers
         /// <param name="username"></param>
         /// <returns>Collection of previous chat messages.</returns>
         [HttpGet]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,CLIENT")]
         [Route("MessageHistory")]
         [ResponseType(typeof(IEnumerable<Message>))]
         public HttpResponseMessage GetMessageHistory([FromUri] int conversationId, int count)
@@ -127,6 +128,43 @@ namespace ChatTU.Controllers
             var messageEntity = _messageService.SaveFile(HttpContext.Current.Request.Files[0], currentUsername, conversationId);
 
             return Request.CreateResponse(HttpStatusCode.OK, new { message = MessageMapping.ToMessageDto(messageEntity, currentUsername) });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "ADMIN,CLIENT")]
+        [Route("GetFile")]
+        public HttpResponseMessage GetFile([FromUri] int messageId)
+        {
+            //Create HTTP Response.
+            HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK);
+
+            //Get the File data from Database.
+            var file = _messageService.GetFile(messageId);
+
+            //Set the Response Content.
+            response.Content = new ByteArrayContent(file.Data);
+
+            //Set the Response Content Length.
+            response.Content.Headers.ContentLength = file.Data.LongLength;
+
+            //Set the Content Disposition Header Value and FileName.
+            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+            response.Content.Headers.ContentDisposition.FileName = file.Name;
+
+            //Set the File Content Type.
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            return response;
+        }
+
+        // This endpoints deletes a specific message from the system.
+        [HttpGet]
+        [Authorize(Roles = "ADMIN,CLIENT")]
+        [Route("DeleteMessage")]
+        public IHttpActionResult DeleteMessage([FromUri] int messageId)
+        {
+            _messageService.DeleteMessage(messageId);
+
+            return Ok();
         }
     }
 }

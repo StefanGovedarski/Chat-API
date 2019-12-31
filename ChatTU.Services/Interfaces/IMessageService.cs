@@ -18,5 +18,11 @@ namespace ChatTU.Services.Interfaces
         bool IsFullHistory(int conversationId, int messageCount);
 
         MessageEntity SaveFile(HttpPostedFile file, string currentUsername, int conversationId);
+
+        string GetUserNameForConversation(int conversationId, string currentUsername);
+
+        FileEntity GetFile(int messageId);
+
+        void DeleteMessage(int messageId);
     }
 }

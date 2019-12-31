@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.Security.OAuth;
@@ -14,7 +15,7 @@ namespace ChatTU.Infrastructure
         {   
             app.UseCors(CorsOptions.AllowAll);
             ConfigureOAuth(app);
-            app.MapSignalR();
+            app.MapSignalR("/signalr/ChatHub", new HubConfiguration { EnableDetailedErrors = false, EnableJavaScriptProxies = true, EnableJSONP = true} );
         }
 
         public void ConfigureOAuth(IAppBuilder app)

@@ -131,5 +131,39 @@ namespace ChatTU.Services
 
             return newMessage;
         }
+
+        public FileEntity GetFile(int messageId)
+        {
+            return _unitOfWork.Files.GetAll().FirstOrDefault(x => x.Message.Id == messageId);
+        }
+
+        public string GetUserNameForConversation(int conversationId, string currentUsername)
+        {
+            var conv = _unitOfWork.Conversations.GetAll().FirstOrDefault(x => x.Id == conversationId);
+            if (conv.ToUser.Username == currentUsername)
+            {
+                return conv.FromUser.Username;
+            }
+            else
+            {
+                return conv.ToUser.Username;
+            }
+        }
+
+        public void DeleteMessage(int messageId)
+        {
+            var message = _unitOfWork.Messages.GetAll().FirstOrDefault(x => x.Id == messageId);
+            var file = _unitOfWork.Files.GetAll().FirstOrDefault(x => x.Message.Id == message.Id);
+
+            if (message != null)
+            {
+                if (file != null)
+                {
+                    _unitOfWork.Files.Remove(file);
+                }
+                _unitOfWork.Messages.Remove(message);
+                _unitOfWork.Save();
+            }
+        }
     }
 }

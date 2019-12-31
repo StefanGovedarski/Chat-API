@@ -96,17 +96,6 @@ namespace ChatTU.Controllers
             return Ok();
         }
 
-        // This endpoints deletes a specific message from the system.
-        [HttpDelete]
-        [Authorize(Roles = "ADMIN")]
-        [Route("DeleteMessage")]
-        public IHttpActionResult DeleteMessage([FromUri] int messageId)
-        {
-            _adminService.ADMIN_DeleteMessage(messageId);
-
-            return Ok();
-        }
-
         // This endpoint deletes a specific conversation with all messages connected to it.
         [HttpDelete]
         [Authorize(Roles = "ADMIN")]

@@ -23,8 +23,6 @@ namespace ChatTU.Services.Interfaces
 
         void ADMIN_EditMessage(int messageId, string content);
 
-        void ADMIN_DeleteMessage(int messageId);
-
         void ADMIN_DeleteConversation(int conversationId);
 
         void ADMIN_DeleteFile(int id);
