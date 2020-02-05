@@ -13,7 +13,7 @@ namespace ChatTU.Services.Interfaces
 
         List<MessageEntity> GetMessages(int conversationId, int count);
 
-        void AddMessage(int conversationId, string sendBy, string content, DateTime time);
+        MessageEntity AddMessage(int conversationId, string sendBy, string content, DateTime time);
 
         bool IsFullHistory(int conversationId, int messageCount);
 

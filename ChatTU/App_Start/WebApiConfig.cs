@@ -7,6 +7,9 @@ namespace ChatTU
     {
         public static void Register(HttpConfiguration config)
         {
+            // Ignore anything to do with SignalR
+            config.Routes.IgnoreRoute("signalr", "signalr/{*pathInfo}");
+
             // Web API routes
             config.MapHttpAttributeRoutes();
 

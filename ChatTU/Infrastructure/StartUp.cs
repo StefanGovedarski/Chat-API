@@ -1,5 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Web.Http;
+using Autofac;
+using Autofac.Integration.SignalR;
+using Autofac.Integration.WebApi;
+using ChatTU.App_Start;
+using ChatTU.MessageHubs;
+using ChatTU.Services.Interfaces;
 using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Infrastructure;
 using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.Security.OAuth;
@@ -12,10 +22,42 @@ namespace ChatTU.Infrastructure
     public class StartUp
     {
         public void Configuration(IAppBuilder app)
-        {   
+        {
+            GlobalConfiguration.Configure(WebApiConfig.Register);
+
+            var builder = new ContainerBuilder();
+
+            builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+
+            builder.RegisterAssemblyTypes(typeof(IService).Assembly)
+                 .AssignableTo<IService>()
+                 .AsImplementedInterfaces();
+
+            builder.RegisterType<ChatHub>().ExternallyOwned();
+
+            var container = builder.Build();
+
+            using (var scope = container.BeginLifetimeScope())
+            {
+                var services = container.Resolve<IEnumerable<IService>>();
+            }
+
+            app.Map("/signalr", map =>
+            {
+                map.UseAutofacMiddleware(container);
+                map.UseCors(CorsOptions.AllowAll);
+                var hubConfiguration = new HubConfiguration
+                {
+                    EnableJSONP = true,
+                    Resolver = new AutofacDependencyResolver(container)
+            };
+                map.RunSignalR(hubConfiguration);
+            });
+
             app.UseCors(CorsOptions.AllowAll);
             ConfigureOAuth(app);
-            app.MapSignalR("/signalr/ChatHub", new HubConfiguration { EnableDetailedErrors = false, EnableJavaScriptProxies = true, EnableJSONP = true} );
+
+            GlobalConfiguration.Configuration.DependencyResolver = new AutofacWebApiDependencyResolver((IContainer)container);
         }
 
         public void ConfigureOAuth(IAppBuilder app)

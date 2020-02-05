@@ -30,8 +30,10 @@ namespace ChatTU.Services
             var results = new List<ConvesationEntity>();
             if (user != null)
             {
-                results = _unitOfWork.Conversations.GetAll().Where(x => (user.Id == x.FromUserId || user.Id == x.ToUserId) && x.IsDeleted == false).OrderByDescending(x => x.LastUpdated).ToList();
-                _userService.MarkLoggedInStatusAs(username, true);
+                results = _unitOfWork.Conversations.GetAll().Where(x => (user.Id == x.FromUserId || user.Id == x.ToUserId)
+                                                                        && x.IsDeleted == false)
+                                                                        .OrderByDescending(x => x.LastUpdated)
+                                                                        .ToList();
             }
 
             return results;
@@ -69,7 +71,7 @@ namespace ChatTU.Services
             return conversation;
         }
 
-        public void AddMessage(int conversationId, string sendBy, string content, DateTime time)
+        public MessageEntity AddMessage(int conversationId, string sendBy, string content, DateTime time)
         {
             var convEntity = _unitOfWork.Conversations.GetAll().FirstOrDefault(x => x.Id == conversationId);
 
@@ -77,7 +79,7 @@ namespace ChatTU.Services
             {
                 SendBy = sendBy,
                 Conversation = convEntity,
-                Time = DateTime.UtcNow,
+                Time = DateTime.Now,
                 Content = content,
                 Status = Data.Enums.MessageStatus.DELIVERED
             };
@@ -85,6 +87,8 @@ namespace ChatTU.Services
             convEntity.LastUpdated = DateTime.Now;
             _unitOfWork.Messages.Add(messageEntity);
             _unitOfWork.Save();
+
+            return messageEntity;
         }
 
         public bool IsFullHistory(int conversationId, int messageCount)
@@ -102,7 +106,6 @@ namespace ChatTU.Services
             {
                 bytes = br.ReadBytes(postedFile.ContentLength);
             }
-
             var conv = _unitOfWork.Conversations.GetAll().FirstOrDefault(x => x.Id == conversationId);
             var timeNow = DateTime.Now;
 
@@ -115,9 +118,7 @@ namespace ChatTU.Services
                 Content = postedFile.FileName,
                 Conversation = conv
             };
-
             _unitOfWork.Messages.Add(newMessage);
-
             FileEntity newFile = new FileEntity()
             {
                 Message = newMessage,
@@ -125,7 +126,6 @@ namespace ChatTU.Services
                 ContentType = postedFile.ContentType,
                 Data = bytes
             };
-
             _unitOfWork.Files.Add(newFile);
             _unitOfWork.Save();
 
@@ -152,17 +152,24 @@ namespace ChatTU.Services
 
         public void DeleteMessage(int messageId)
         {
-            var message = _unitOfWork.Messages.GetAll().FirstOrDefault(x => x.Id == messageId);
-            var file = _unitOfWork.Files.GetAll().FirstOrDefault(x => x.Message.Id == message.Id);
-
-            if (message != null)
+            try
             {
-                if (file != null)
+                var message = _unitOfWork.Messages.GetAll().FirstOrDefault(x => x.Id == messageId);
+                var file = _unitOfWork.Files.GetAll().FirstOrDefault(x => x.Message.Id == message.Id);
+
+                if (message != null)
                 {
-                    _unitOfWork.Files.Remove(file);
+                    if (file != null)
+                    {
+                        _unitOfWork.Files.Remove(file);
+                    }
+                    _unitOfWork.Messages.Remove(message);
+                    _unitOfWork.Save();
                 }
-                _unitOfWork.Messages.Remove(message);
-                _unitOfWork.Save();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
     }

@@ -24,9 +24,6 @@ namespace ChatTU.App_Start
                  .AssignableTo<IService>()
                  .AsImplementedInterfaces();
 
-            // Register your SignalR hubs.
-            builder.RegisterHubs(Assembly.GetExecutingAssembly());
-
             return builder.Build();
         }
     }
